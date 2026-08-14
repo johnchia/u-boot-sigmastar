@@ -47,6 +47,15 @@
  */
 #define CONFIG_ENV_OVERWRITE
 
+/*
+ * The derivation itself, in arch/arm/cpu/armv7/sstar_ethaddr.c. It reads the
+ * flash rather than the die because the die ID registers read zero on this
+ * part; the same file serves Infinity6E, where they do not, so that both come
+ * up with an address derived the one way. Needs CONFIG_MS_NOR_ONEBIN, which is
+ * what builds mdrv_spinor_read_unique_id.
+ */
+#define CONFIG_SSTAR_ETHADDR_FROM_NOR_UID
+
 #if CONFIG_VERSION_FPGA
 #define CONFIG_SYS_HZ_CLOCK 24000000
 #define CONFIG_UART_CLOCK   24000000
