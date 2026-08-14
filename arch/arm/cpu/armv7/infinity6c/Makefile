@@ -12,6 +12,11 @@
 # GNU General Public License version 2 for more details.
 #
 
+# chip.c derives ethaddr from the NOR part's unique ID, which needs the flash
+# driver's own header. The flash Makefile puts that directory only on its own
+# include path, so it has to be named again here.
+ccflags-$(CONFIG_MS_NOR_ONEBIN) += -I$(srctree)/drivers/mstar/flash/nor/
+
 obj-y	:= chip.o
 obj-$(CONFIG_MS_PIU_TIMER)	+= timer.o
 #obj-y	+= ms_serial.o #moved to drivers/sstar/uart

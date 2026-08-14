@@ -1421,6 +1421,62 @@ u8 mdrv_spinor_read(u32 u32_address, u8 *pu8_data, u32 u32_size)
     return u8_status;
 }
 
+/*
+ * The part's factory unique ID. Not a status read -- the opcode is followed by
+ * four dummy bytes before any data, so this is built from the transmit and
+ * receive primitives directly rather than going through
+ * drv_spinor_complete_read_status, which sends the opcode alone.
+ *
+ * Read-only and side-effect free: no write enable, no status polling, nothing
+ * latched in the part, so it is safe to issue between any two other operations.
+ */
+u8 mdrv_spinor_read_unique_id(u8 *pu8_uid)
+{
+    u8 au8_cmd[1 + SPI_NOR_RDUID_DUMMY_CNT];
+    u8 u8_status;
+    u8 u8_i;
+    u8 u8_and = 0xFF;
+    u8 u8_or  = 0x00;
+
+    if (!g_pst_spinor_sni || !pu8_uid)
+        return ERR_SPINOR_DEVICE_FAILURE;
+
+    memset(au8_cmd, 0, sizeof(au8_cmd));
+    au8_cmd[0] = SPI_NOR_CMD_RDUID;
+
+    DRV_QSPI_pull_cs(0);
+    if (ERR_SPINOR_SUCCESS == (u8_status = drv_spinor_simple_transmission(au8_cmd, sizeof(au8_cmd))))
+    {
+        u8_status = drv_spinor_receive_data(pu8_uid, SPI_NOR_RDUID_BYTE_CNT);
+    }
+    DRV_QSPI_pull_cs(1);
+
+    if (ERR_SPINOR_SUCCESS != u8_status)
+    {
+        return drv_spinor_return_status(u8_status);
+    }
+
+    /*
+     * All-zero or all-ones means the part answered the opcode with nothing --
+     * either it implements no unique number, or the bus read back idle. Both
+     * are identical on every unit, and a caller deriving an identity from one
+     * would hand the whole fleet the same address, so this is a failure rather
+     * than a value.
+     */
+    for (u8_i = 0; SPI_NOR_RDUID_BYTE_CNT > u8_i; u8_i++)
+    {
+        u8_and &= pu8_uid[u8_i];
+        u8_or |= pu8_uid[u8_i];
+    }
+
+    if (0x00 == u8_or || 0xFF == u8_and)
+    {
+        return ERR_SPINOR_DEVICE_FAILURE;
+    }
+
+    return ERR_SPINOR_SUCCESS;
+}
+
 u8 mdrv_spinor_program(u32 u32_address, u8 *pu8_data, u32 u32_size)
 {
     u16 u16_write_size;
