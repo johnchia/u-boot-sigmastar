@@ -1175,13 +1175,28 @@ define filechk_uboot.release
 	echo "$(UBOOTVERSION)$$($(CONFIG_SHELL) $(srctree)/scripts/setlocalversion $(srctree))"
 endef
 
+# The changelist is the short commit hash that ends up inside the MVXV version
+# string, which is what `ver` prints on the board -- the only way to tell one
+# bootloader build from another once it is in flash.
+#
+# It used to be read straight from `git rev-parse`, which fails when the tree
+# did not come from a clone. A build system that unpacks a release tarball --
+# Buildroot's sigmastar-uboot package does exactly that -- has no .git, git
+# prints nothing, and ms_gen_mvxv_h.py then dies on a missing argument, so the
+# build stops at the version header for want of a version. Setting
+# UBOOT_CHANGELIST lets such a build pass the identity it already knows.
+#
+# Keep it to 8 characters: the script pads shorter values with '#' to a fixed
+# field, and a longer one shifts everything after it in a fixed-width string.
+UBOOT_CHANGELIST ?= $(shell git rev-parse --short HEAD 2>/dev/null || echo unknown)
+
 # Store (new) UBOOTRELEASE string in include/config/uboot.release
 include/config/uboot.release: include/config/auto.conf FORCE
 	@echo '  GCC version: $(shell $(CC) -dumpversion)'
 	@echo '  MVXV'
 	@echo chip_id $(MS_PLATFORM_ID)
 	@python3 ms_gen_mvxv_h.py include/ms_version.h --comp_id CM_UBT1501 \
-		--changelist $$(git rev-parse --short HEAD) --chip_id $(MS_PLATFORM_ID)
+		--changelist $(UBOOT_CHANGELIST) --chip_id $(MS_PLATFORM_ID)
 	$(call filechk,uboot.release)
 
 # Things we need to do before we recursively start building the kernel
