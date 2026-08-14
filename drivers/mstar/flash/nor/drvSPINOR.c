@@ -1471,7 +1471,7 @@ u8 mdrv_spinor_read_unique_id(u8 *pu8_uid)
 
     if (0x00 == u8_or || 0xFF == u8_and)
     {
-        return ERR_SPINOR_DEVICE_FAILURE;
+        return ERR_SPINOR_INVALID;
     }
 
     return ERR_SPINOR_SUCCESS;

@@ -33,6 +33,20 @@
 
 #define CONFIG_BOARD_LATE_INIT
 
+/*
+ * ethaddr has to be writable, because on this board it is derived rather than
+ * assigned. Without this, env_flags gives it "mo" -- MAC, write-once -- and the
+ * first setenv after one exists is refused with "Can't overwrite", which is
+ * silent on a camera with no console.
+ *
+ * The protection exists to stop a factory-assigned address being clobbered.
+ * There is no factory-assigned address here: every unit ships with the same
+ * 00:00:23:34:45:66, so write-once protects a value that is wrong on every
+ * board but the first. board_late_init replaces it with one derived from the
+ * NOR part's unique ID, and only ever when it is empty or still that default.
+ */
+#define CONFIG_ENV_OVERWRITE
+
 #if CONFIG_VERSION_FPGA
 #define CONFIG_SYS_HZ_CLOCK 24000000
 #define CONFIG_UART_CLOCK   24000000

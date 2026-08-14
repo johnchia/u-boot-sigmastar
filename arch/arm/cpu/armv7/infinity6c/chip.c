@@ -284,8 +284,11 @@ static void board_provision_ethaddr(void)
 {
     u8   au8_uid[SPI_NOR_RDUID_BYTE_CNT];
     char ac_mac[18];
+    char ac_uid[20];
+    char ac_stat[8];
     char *pc_current;
     u8   au8_mac[6];
+    u8   u8_uid_status;
     u8   u8_i;
 
     pc_current = getenv("ethaddr");
@@ -294,9 +297,27 @@ static void board_provision_ethaddr(void)
         return;
     }
 
-    if (ERR_SPINOR_SUCCESS != mdrv_spinor_read_unique_id(au8_uid))
+    /*
+     * There is no console on a deployed board, so the outcome is recorded in
+     * the environment where Linux can read it back with fw_printenv. uidstat is
+     * the driver's status code and uidraw the bytes it returned, both written
+     * whatever happens -- a failure that says nothing is the one thing this
+     * cannot afford, since it is indistinguishable from the code never running.
+     */
+    memset(au8_uid, 0, sizeof(au8_uid));
+    u8_uid_status = mdrv_spinor_read_unique_id(au8_uid);
+
+    sprintf(ac_uid, "%02x%02x%02x%02x%02x%02x%02x%02x", au8_uid[0], au8_uid[1], au8_uid[2],
+            au8_uid[3], au8_uid[4], au8_uid[5], au8_uid[6], au8_uid[7]);
+    setenv("uidraw", ac_uid);
+    sprintf(ac_stat, "%d", u8_uid_status);
+    setenv("uidstat", ac_stat);
+
+    if (ERR_SPINOR_SUCCESS != u8_uid_status)
     {
-        printf("MAC: no unique ID from the flash, leaving ethaddr alone\n");
+        printf("MAC: no unique ID from the flash (status %d), leaving ethaddr alone\n",
+               u8_uid_status);
+        saveenv();
         return;
     }
 
