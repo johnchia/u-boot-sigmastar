@@ -21,10 +21,6 @@
 #include "asm/arch/mach/io.h"
 #include "ms_version.h"
 
-#ifdef CONFIG_SSTAR_ETHADDR_FROM_NOR_UID
-#include <asm/sstar_ethaddr.h>
-#endif
-
 #define STORAGE_SPI_NONE            (0x00)
 #define STORAGE_SPI_NAND_SKIP_SD    (BIT2)
 #define STORAGE_SPI_NAND            (BIT4)
@@ -328,10 +324,6 @@ int board_late_init(void)
         setenv("memlx", "0x3FE0000");
         setenv("memsz", "0x1E9C000");
     }
-
-#ifdef CONFIG_SSTAR_ETHADDR_FROM_NOR_UID
-    sstar_provision_ethaddr();
-#endif
 
     return 0;
 }

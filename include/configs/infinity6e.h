@@ -33,30 +33,6 @@
 
 #define CONFIG_BOARD_LATE_INIT
 
-/*
- * ethaddr has to be writable, because on this board it is derived rather than
- * assigned. Without this, env_flags gives it "mo" -- MAC, write-once -- and the
- * first setenv after one exists is refused with "Can't overwrite", which is
- * silent on a camera with no console.
- *
- * The protection exists to stop a factory-assigned address being clobbered.
- * There is no factory-assigned address here: every unit ships with the same
- * 00:00:23:34:45:66, so write-once protects a value that is wrong on every
- * board but the first. board_late_init replaces it with one derived from the
- * NOR part's unique ID, and only ever when it is empty or still that default.
- */
-#define CONFIG_ENV_OVERWRITE
-
-/*
- * The derivation itself, in arch/arm/cpu/armv7/sstar_ethaddr.c, shared with
- * Infinity6C. This part does have a usable die ID -- 48 bits of OTP at
- * 0x1F203150, where the 6C registers read zero -- and deliberately does not use
- * it: one derivation that works on both parts beats two that each work on one,
- * and nothing outside U-Boot reads the die ID today anyway. Needs
- * CONFIG_MS_NOR_ONEBIN, which is what builds mdrv_spinor_read_unique_id.
- */
-#define CONFIG_SSTAR_ETHADDR_FROM_NOR_UID
-
 #if CONFIG_VERSION_FPGA
 #define CONFIG_SYS_HZ_CLOCK 12000000
 #define CONFIG_UART_CLOCK   12000000
