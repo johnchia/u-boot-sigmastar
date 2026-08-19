@@ -30,18 +30,6 @@ typedef unsigned long long u64;
 #define SPI_NOR_CMD_READ     (0x03)
 #define SPI_NOR_CMD_FASTREAD (0x0B)
 #define SPI_NOR_CMD_RDID     (0x9F)
-/*
- * Read Unique ID: the opcode, four dummy bytes, then 64 bits the factory
- * programs and the part cannot change. Winbond's W25Q convention, which the
- * clones this family is fitted with follow -- the FM25Q128A on the SSC377QE
- * board documents it as "a factory-set read-only 64-bit number that is unique
- * to each FM25Q128A device". A part that does not implement it clocks out
- * all-zero or all-ones, so the caller has to reject both rather than trust
- * whatever comes back.
- */
-#define SPI_NOR_CMD_RDUID       (0x4B)
-#define SPI_NOR_RDUID_DUMMY_CNT (4)
-#define SPI_NOR_RDUID_BYTE_CNT  (8)
 #define SPI_NOR_CMD_WREN     (0x06)
 #define SPI_NOR_CMD_WRDIS    (0x04)
 #define SPI_NOR_CMD_SE       (0x20)
@@ -116,13 +104,5 @@ u8   mdrv_spinor_deinit(void);
 u8 mdrv_spinor_read(u32 u32_address, u8 *pu8_data, u32 u32_size);
 u8 mdrv_spinor_program(u32 u32_address, u8 *pu8_data, u32 u32_size);
 u8 mdrv_spinor_erase(u32 u32_address, u32 u32_size);
-
-/*
- * Fills SPI_NOR_RDUID_BYTE_CNT bytes with the part's factory unique ID, or
- * fails. A degenerate ID -- all-zero or all-ones -- is reported as a failure
- * rather than passed on, because it means the part has no such number and every
- * unit would otherwise agree on the same one.
- */
-u8 mdrv_spinor_read_unique_id(u8 *pu8_uid);
 
 #endif /* _DRVSPINOR_H_ */

@@ -77,8 +77,3 @@ obj-$(CONFIG_MERCURY6) += mercury6/
 obj-$(CONFIG_INFINITY7) += infinity7/
 obj-$(CONFIG_MERCURY6P) += mercury6p/
 obj-$(CONFIG_INFINITY6C) += infinity6c/
-
-# ethaddr derived from the NOR part's unique ID, shared by every SigmaStar SoC
-# that opts in. It lives here rather than in one of the per-SoC directories
-# above because the derivation is not a property of the SoC -- the two that use
-# it today would otherwise hold identical copies, and a third would make three.
