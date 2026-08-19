@@ -82,9 +82,3 @@ obj-$(CONFIG_INFINITY6C) += infinity6c/
 # that opts in. It lives here rather than in one of the per-SoC directories
 # above because the derivation is not a property of the SoC -- the two that use
 # it today would otherwise hold identical copies, and a third would make three.
-#
-# The flash driver's header is on its own include path only, so it has to be
-# named again here. Both are keyed on the same symbol: a board that defines it
-# without CONFIG_MS_NOR_ONEBIN has no mdrv_spinor_read_unique_id to link against.
-ccflags-$(CONFIG_SSTAR_ETHADDR_FROM_NOR_UID) += -I$(srctree)/drivers/mstar/flash/nor/
-obj-$(CONFIG_SSTAR_ETHADDR_FROM_NOR_UID) += sstar_ethaddr.o
